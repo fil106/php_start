@@ -12,7 +12,7 @@
 
 	//определяем корневую директорию сайта в константу ROOT
 	define('ROOT', dirname(__FILE__));
-	require_once(ROOT.'/components/Route.php');
+	require_once(ROOT . '/components/Router.php');
 
 	//3. Установка соединения с БД
 
