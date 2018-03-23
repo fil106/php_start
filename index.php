@@ -16,7 +16,7 @@
 
 	//3. Установка соединения с БД
 
-	//4. Вызов Router
+	//4. Вызов Router / Передача управления Router
 
 	$router = new Router();
 	$router->run();
