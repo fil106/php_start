@@ -1,10 +1,12 @@
 <?php
 
-	class Router {
+	class Router
+	{
 
 		private $routes; // Приватная переменная для хранения маршрутов из файла routes.php
 
-		public function __construct() {
+		public function __construct()
+		{
 
 			$routerPath = ROOT.'/config/routes.php';
 			$this->routes = include($routerPath); //записываем в свойство routes маршруты из файла routes.php
@@ -16,7 +18,8 @@
 		 * Return request string
 		 *
 		 */
-		private function getURI() {
+		private function getURI()
+		{
 
 			if (!empty($_SERVER['REQUEST_URI'])) {
 				return trim($_SERVER['REQUEST_URI'], '/');
@@ -24,50 +27,71 @@
 
 		}
 
-		public function run() {
+		public function run()
+		{
 
 			// Получить строку запроса
 			$uri = $this->getURI();
 
 			// Проверить наличие такого запроса в routes.php
-			foreach ($this->routes as $uriPattern => $path) {
+			foreach ($this->routes as $uriPattern => $path)
+			{
 
 				//Сравниваем $uriPattern и $uri
-				if (preg_match("~$uriPattern~", $uri)) {
+				if (preg_match("~$uriPattern~", $uri))
+				{
 
-					//Определить какой контроллер
-					//и action обрабатывают запрос
+					$internalRoute = preg_replace("~$uriPattern~", $path, $uri);
 
-					$segments = explode('/', $path);
+					//Определить какой контроллер и action обрабатывают запрос
+
+					//$segments = explode('/', $path);
+					//
+					//$controllerName = array_shift($segments).'Controller';
+					//$controllerName = ucfirst($controllerName); //делает первую букву заглавной
+					//
+					//$actionName = 'action'.ucfirst(array_shift($segments));
+
+					//Определить контроллер, action, параметры
+
+					$segments = explode('/', $internalRoute);
 
 					$controllerName = array_shift($segments).'Controller';
-					$controllerName = ucfirst($controllerName); //делает первую букву заглавной
+					$controllerName = ucfirst($controllerName);
 
 					$actionName = 'action'.ucfirst(array_shift($segments));
+
+					$parameters = $segments;
 
 					//Подключить файл класса-контроллера
 					$controllerFile = ROOT."/controllers/$controllerName.php";
 
-					if (file_exists($controllerFile)) {
+					//Подключаем файл контроллера, если тот существует
+					if (file_exists($controllerFile))
+					{
 						include_once($controllerFile);
 					}
 
-					//Создать объект, вызвать метод (т.е. action)
+					//Создание экземпляра класса нужного контроллера
 					$controllerObject = new $controllerName;
-					$result = $controllerObject->$actionName();
-					if ($result != null) {
+
+					//Передаем параметры в нужный метод нужного контроллера
+					//вариант 1
+					//$result = $controllerName->$actionName($parameters);
+					//
+					//варинат 2 (лучше)
+
+					$result = call_user_func_array(array($controllerObject, $actionName), $parameters);
+
+					//напоследок проверяем что вернул нам метод, если ничего не вернул, то прервем выполнение текущего метода
+					if ($result != null)
+					{
 						break;
 					}
 
 				}
 
 			}
-
-			// Если есть совпадение, определить какой контроллер и action обрабатывают запрос
-
-			// Подключить файл класса-контроллера
-
-			// Создать объект, вызвать метод (т.е. action)
 
 		}
 
