@@ -6,7 +6,7 @@
 		public function actionList()
 		{
 
-			echo 'ProductController actionList';
+			include_once(ROOT.'/views/articles.php');
 			return true;
 
 
